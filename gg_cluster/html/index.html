@@ -1,0 +1,312 @@
+<!--
+      _       _   _   _            __  __           
+     | |     | | | | | |          / _|/ _|          
+   __| | ___ | |_| |_| |__  _   _| |_| |_ ___ _   _ 
+  / _` |/ _ \| __| __| '_ \| | | |  _|  _/ _ \ | | |
+ | (_| | (_) | |_| |_| |_) | |_| | | | ||  __/ |_| |
+  \__,_|\___/ \__|\__|_.__/ \__,_|_| |_(_)___|\__,_|
+                                                    
+/**
+ * @brief		Speedometr aka 5City
+ * @author		<a href='https://dottbuff.eu'>dottbuff</a>
+ * @copyright	(c) dottbuff.eu
+ * @since		19 July 2021
+ * @discord     https://discord.gg/XW6aQWVrMq
+ * @EN: Absolute prohibition of copying and sharing without permission of the author
+ * @PL: Całkowity zakaz kopiowania i udostępniania bez zgody autora
+ */
+-->
+<!DOCTYPE html>
+<html lang="pl-PL" dir="ltr">
+    <head>
+        <!-- (db) META -->
+        <meta charset="utf-8">
+        <meta name="author" content="https://dottbuff.eu">
+        <title>dottbuff.eu - speedometr</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- (db) STYLESHEETS -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/v4-shims.css">
+        <link rel="stylesheet" href="https://unpkg.com/tippy.js@5/animations/scale.css">
+        <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+        <!-- (db) GOOGLE FONTS -->
+        <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class='speedometr'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 49 40.22">
+                <path id="progressbar-bar-line-none" class="progress-bar-line" fill-opacity="0" stroke-width="2" d="M1048.02,1119.34a22.5,22.5,0,1,1,37.15-.28" transform="translate(-1042 -1082)" style="stroke: #1f1f1f;fill: none;/* stroke-linecap: round; *//* fill-rule: evenodd; */"></path>
+                <path id="progressbar-bar-line" class="progress-bar-line" fill-opacity="0" stroke-width="2" stroke="#d00426" d="M1048.02,1119.34a22.5,22.5,0,1,1,37.15-.28" transform="translate(-1042 -1082)" style="stroke-dasharray: calc(97.6754 + 50), calc(97.6754 + 50);stroke-dashoffset: 97.6754;fill: none;/* stroke-linecap: round; */fill-rule: evenodd;stroke: #513df7;"></path>
+            </svg>
+            <div class="players-bar-info">
+				<div class="players-bar-info-title-now">
+                    <span id='speed-1'>2</span>
+                    <span id='speed-2'>5</span>
+                    <span id='speed-3'>0</span>
+                </div>
+				<h2 class="players-bar-info-title-max">9525</h2>
+			</div>
+            <div class="info_car">
+                <i class="fas fa-gas-pump"></i>
+                <i class="far fa-lightbulb"></i>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="./script.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var speedText = '';
+    
+            $(function() {
+                window.addEventListener('message', function(event) {
+    
+                    if(event.data.type === "speedometer_send") {
+    
+                        if(event.data.speed >= 100) {
+                            var tmpSpeed = Math.floor(event.data.speed) + '';
+                            speedText = '<span id="speed-1">' + tmpSpeed.substr(0, 1) + '</span><span id="speed-2">' + tmpSpeed.substr(1, 1) + '</span><span id="speed-3">' + tmpSpeed.substr(2, 1) + '</span>';
+                        } else if(event.data.speed >= 10 && event.data.speed < 100) {
+                            var tmpSpeed = Math.floor(event.data.speed) + '';
+                            speedText = '<span id="speed-1">0</span><span id="speed-2">' + tmpSpeed.substr(0, 1) + '</span><span id="speed-3">' + tmpSpeed.substr(1, 1) + '</span>';
+                        } else if(event.data.speed > 0 && event.data.speed < 10) {
+                            speedText = '<span id="speed-1">0</span><span id="speed-2">0</span><span id="speed-3">' + Math.floor(event.data.speed) + '</span>';
+                        } else {
+                            speedText = '<span id="speed-1">0</span><span id="speed-2">0</span><span id="speed-3">0</span>';
+                        }
+    
+                        $('.players-bar-info-title-now').html(speedText);
+                        $('.players-bar-info-title-max').html(event.data.rpm);
+    
+                        $(".speedometr").each(function(){
+    
+                            var $bar = $(this).find("#progressbar-bar-line");
+                            $bar.css({ 
+                                "stroke-dasharray": "calc(97.6754 + "+event.data.rpm/100+"), calc(97.6754 + "+event.data.rpm/100+")",
+                                transition: "all .3s ease", // 100%=180° so: ° = % * 1.8
+                                // 45 is to add the needed rotation to have the green borders at the bottom
+                            });
+                        });
+                    }
+                });
+            });
+        </script>
+        <style>
+            ::-webkit-scrollbar {
+                width: 0;
+            }
+            ::-webkit-scrollbar-thumb {
+                background-color: #f89c40;
+                border-radius: 25px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            * {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+                user-select: none;
+            }
+
+            html, body {
+                height: 100%;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                color: #fff;
+                font-family: 'Barlow', sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+            }
+
+            a {
+                color: #fff;
+            }
+
+            .list_reset {
+                padding: 0;
+                margin: 0;
+                list-style: none;
+            }
+
+            img {
+                max-width: 100%;
+            }
+
+            :focus {
+                outline: 0;
+            }
+
+            /********* SPEEDOMETR *********/
+
+            .speedometr {
+                display: block;
+                position: absolute;
+                right: 2%;
+                bottom: 2%;
+                width: 200px;
+                height: 200px;
+                z-index: 1;
+                transform: translate(-2%, -2%);
+            }
+
+            .speedometr svg {
+                transform: rotate(45deg);
+                transform-origin: 50% 50%;
+                filter: drop-shadow(0 0 10px rgb(0 0 0 / 0.9));
+            }
+
+            .speedometr i:first-child {
+                margin: 0 13px 0 0;
+            }
+
+            .speedometr .info_car {
+                display: block;
+                position: absolute;
+                padding: 8px 15px;
+                left: -3%;
+                bottom: -3%;
+                background: #1f1f1f;
+                font-size: 13px;
+                border-radius: 5px;
+                color: #513df7;
+            }
+
+            /*.players-bar-info {
+                display: block;
+                width: 100%;
+                position: absolute;
+                z-index: 2;
+                top: 60%;
+                left: 0;
+                padding: 0 7px;
+                transform: translateY(-60%);
+            }*/
+
+            .players-bar-info {
+                display: block;
+                width: 100%;
+                position: absolute;
+                z-index: 2;
+                top: 60%;
+                left: 0;
+                padding: 0 30px 8px 7px;
+                transform: translateY(-60%);
+            }
+
+            .players-bar-info div.players-bar-info-title-now {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                font-size: 40px;
+                font-weight: 800;
+                color: #fff;
+                text-align: center;
+                line-height: 1.6;
+                position: relative;
+            }
+
+            /*.players-bar-info div.players-bar-info-title-now:after {
+                content: '';
+                display: block;
+                position: absolute;
+                width: 36%;
+                height: 1px;
+                background: #7f8593;
+                opacity: 0.2;
+                bottom: 2%;
+                left: 50%;
+                transform: translate(-50%, -2%);
+            }
+
+            .players-bar-info h2.players-bar-info-title-max {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                font-size: 15px;
+                font-weight: 400;
+                color: #7f8593;
+                text-align: center;
+                line-height: 1.6;
+            }*/
+
+            .players-bar-info h2.players-bar-info-title-max {
+                display: block;
+                width: 100%;
+                margin: -17px 0 0 0;
+                padding: 0 50px;
+                font-size: 15px;
+                font-weight: 700;
+                color: #7f8593;
+                text-align: right;
+                line-height: 1.6;
+            }
+
+            .players-bar-info div.players-bar-info-title-now span {
+                margin: 0;
+                padding: 0;
+                display: inline-block;
+            }
+
+            .players-bar-info div.players-bar-info-title-now span:not(:last-child) {
+                margin-right: 0px;
+            }
+
+            .speedometr .belts {
+                display: block;
+                position: absolute;
+                left: 50%;
+                transform: translate(-50%,-35%);
+                top: 35%;
+            }
+
+            .speedometr .belts img {
+                width: 25px;
+                opacity: 1;
+                visibility: visible;
+                transition: all 310ms ease;
+                -webkit-transition: all 310ms ease;
+            }
+
+            .speedometr .belts::after {
+                content: '';
+                display: block;
+                position: absolute;
+                top: 0;
+                width: 25px;
+                height: 25px;
+                background: url(seatbeltson.svg) center no-repeat;
+                z-index: 3;
+                visibility: hidden;
+                opacity: 0;
+                transition: all 310ms ease;
+                -webkit-transition: all 310ms ease;
+                pointer-events: none;
+            }
+
+            .speedometr .belts.active::after {
+                opacity: 1;
+                visibility: visible;
+                transition: all 310ms ease;
+                -webkit-transition: all 310ms ease;
+            }
+
+            .speedometr .belts.active img {
+                visibility: hidden;
+                opacity: 0;
+                transition: all 310ms ease;
+                -webkit-transition: all 310ms ease;
+            }
+        </style>
+    </body>
+</html>
